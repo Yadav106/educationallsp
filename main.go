@@ -2,33 +2,71 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"log"
 	"os"
 
+	"github.com/Yadav106/educationallsp/lsp"
 	"github.com/Yadav106/educationallsp/rpc"
 )
 
 func main() {
-  logger := getLogger("/Users/macbook/Desktop/Programming/educationallsp/log.txt")
-  logger.Println("Mic Check! 1! 2! 3!")
-  scanner := bufio.NewScanner(os.Stdin)
-  scanner.Split(rpc.Split)
+	logger := getLogger("/Users/macbook/Desktop/Programming/educationallsp/log.txt")
+	logger.Println("Mic Check! 1! 2! 3!")
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Split(rpc.Split)
 
-  for scanner.Scan() {
-    msg := scanner.Text()
-    handleMessage(logger, msg)
-  }
+	for scanner.Scan() {
+		msg := scanner.Bytes()
+		method, content, err := rpc.DecodeMessage(msg)
+		if err != nil {
+			logger.Printf("Got an error: %s", err)
+			continue
+		}
+
+		handleMessage(logger, method, content)
+	}
 }
 
-func handleMessage (logger *log.Logger, msg any) {
-  logger.Println(msg)
+func handleMessage(logger *log.Logger, method string, content []byte) {
+	logger.Printf("Received message with method: %s", method)
+
+	switch method {
+	case "initialize":
+		var request lsp.InitializeRequest
+		if err := json.Unmarshal(content, &request); err != nil {
+			logger.Printf("Hey, we couldn't parse this: %s", err)
+		}
+
+		logger.Printf("Connected to: %s %s",
+			request.Params.ClientInfo.Name,
+			request.Params.ClientInfo.Version,
+		)
+
+		msg := lsp.NewInitializeResponse(request.ID)
+		reply := rpc.EncodeMessage(msg)
+
+		writer := os.Stdout
+		writer.Write([]byte(reply))
+
+		logger.Println("Sent Reply!")
+
+	case "textDocument/didOpen":
+		var request lsp.DidOpenTextDocumentNotification
+		if err := json.Unmarshal(content, &request); err != nil {
+			logger.Printf("Hey, we couldn't parse this: %s", err)
+		}
+
+		logger.Printf("Opened: %s %s", request.Params.TextDocument.URI, request.Params.TextDocument.Text)
+
+	}
 }
 
 func getLogger(fileName string) *log.Logger {
-  logfile, err := os.OpenFile(fileName, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0666)
-  if err != nil {
-    panic("give a better file 🗿")
-  }
+	logfile, err := os.OpenFile(fileName, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0666)
+	if err != nil {
+		panic("give a better file 🗿")
+	}
 
-  return log.New(logfile, "[educationallsp]", log.Ldate|log.Ltime|log.Lshortfile)
+	return log.New(logfile, "[educationallsp]", log.Ldate|log.Ltime|log.Lshortfile)
 }
