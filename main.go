@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/Yadav106/educationallsp/analysis"
 	"github.com/Yadav106/educationallsp/lsp"
 	"github.com/Yadav106/educationallsp/rpc"
 )
@@ -13,8 +14,11 @@ import (
 func main() {
 	logger := getLogger("/Users/macbook/Desktop/Programming/educationallsp/log.txt")
 	logger.Println("Mic Check! 1! 2! 3!")
+
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Split(rpc.Split)
+
+	state := analysis.NewState()
 
 	for scanner.Scan() {
 		msg := scanner.Bytes()
@@ -24,11 +28,11 @@ func main() {
 			continue
 		}
 
-		handleMessage(logger, method, content)
+		handleMessage(logger, state, method, content)
 	}
 }
 
-func handleMessage(logger *log.Logger, method string, content []byte) {
+func handleMessage(logger *log.Logger, state analysis.State, method string, content []byte) {
 	logger.Printf("Received message with method: %s", method)
 
 	switch method {
@@ -58,6 +62,7 @@ func handleMessage(logger *log.Logger, method string, content []byte) {
 		}
 
 		logger.Printf("Opened: %s %s", request.Params.TextDocument.URI, request.Params.TextDocument.Text)
+		state.OpenDocument(request.Params.TextDocument.URI, request.Params.TextDocument.Text)
 
 	}
 }
