@@ -16,11 +16,13 @@ func main() {
 
   for scanner.Scan() {
     msg := scanner.Text()
-    handleMessage(msg)
+    handleMessage(logger, msg)
   }
 }
 
-func handleMessage (_ any) {}
+func handleMessage (logger *log.Logger, msg any) {
+  logger.Println(msg)
+}
 
 func getLogger(fileName string) *log.Logger {
   logfile, err := os.OpenFile(fileName, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0666)
