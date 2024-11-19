@@ -112,6 +112,18 @@ func handleMessage(logger *log.Logger, writer io.Writer, state analysis.State, m
 		// write it back
 		writeResponse(writer, response)
 
+	case "textDocument/completion":
+		var request lsp.CompletionRequest
+		if err := json.Unmarshal(content, &request); err != nil {
+			logger.Printf("ERROR! textDocument/hover: %s", err)
+			return
+		}
+
+		// create a response
+		response := state.TextDocumentCompletion(request.ID, request.Params.TextDocument.URI)
+		// write it back
+		writeResponse(writer, response)
+
 	}
 }
 

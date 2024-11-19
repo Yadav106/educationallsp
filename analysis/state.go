@@ -63,27 +63,27 @@ func (s *State) TextDocumentCodeAction(id int, uri string) lsp.CodeActionRespons
 	text := s.Documents[uri]
 	actions := []lsp.CodeAction{}
 
-  uri_split := strings.Split(uri, "/")
-  title := uri_split[len(uri_split) - 2]
+	uri_split := strings.Split(uri, "/")
+	title := uri_split[len(uri_split)-2]
 
-  text_split := strings.Split(text, "\n")
+	text_split := strings.Split(text, "\n")
 
-  if (len(text_split) > 0) && (strings.Index(text_split[0], title) < 0) {
-    appendChange := map[string][]lsp.TextEdit{}
-    appendChange[uri] = []lsp.TextEdit {
-      {
-        Range:   LineRange(0, 0, 0),
-      	NewText: fmt.Sprintf("# %s\n", title),
-      },
-    }
+	if (len(text_split) > 0) && (strings.Index(text_split[0], title) < 0) {
+		appendChange := map[string][]lsp.TextEdit{}
+		appendChange[uri] = []lsp.TextEdit{
+			{
+				Range:   LineRange(0, 0, 0),
+				NewText: fmt.Sprintf("# %s\n", title),
+			},
+		}
 
-    actions = append(actions, lsp.CodeAction{
-    	Title:   "Add title to the markdown file",
-    	Edit:    &lsp.WorkspaceEdit{
-        Changes: appendChange,
-      },
-    })
-  }
+		actions = append(actions, lsp.CodeAction{
+			Title: "Add title to the markdown file",
+			Edit: &lsp.WorkspaceEdit{
+				Changes: appendChange,
+			},
+		})
+	}
 
 	for row, line := range text_split {
 		idx := strings.Index(line, "VS Code")
@@ -124,6 +124,21 @@ func (s *State) TextDocumentCodeAction(id int, uri string) lsp.CodeActionRespons
 			ID:  &id,
 		},
 		Result: actions,
+	}
+}
+
+func (s *State) TextDocumentCompletion(id int, uri string) lsp.CompletionResponse {
+	items := []lsp.CompletionItem{
+    {
+    	Label:         "LSP Autocomplete",
+    	Detail:        "Testing Autocompletion",
+    	Documentation: "Very cool isn't it",
+    },
+  }
+
+	return lsp.CompletionResponse{
+		Response: lsp.Response{RPC: "2.0", ID: &id},
+		Result:   items,
 	}
 }
 

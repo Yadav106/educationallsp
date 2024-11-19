@@ -6,4 +6,8 @@ It doesn't do anything special for any particular language, it is focused on hel
 
 made some changes
 
-VS Code is the best
+Neovim is the best
+
+Hello World
+Neovim
+
