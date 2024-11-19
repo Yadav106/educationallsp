@@ -18,12 +18,34 @@ func NewState() State {
 	}
 }
 
-func (s *State) OpenDocument(uri, text string) {
-	s.Documents[uri] = text
+func getDiagnosticsForFile(text string) []lsp.Diagnostic {
+  diagnostics := []lsp.Diagnostic{}
+  for row, line := range strings.Split(text, "\n") {
+    // diagnostics = append(diagnostics, )
+    if strings.Contains(line, "VS Code") {
+      idx := strings.Index(text, "VS Code")
+      diagnostics = append(diagnostics, lsp.Diagnostic{
+      	Range:    LineRange(row, idx, idx + len("VS Code")),
+      	Severity: 1,
+      	Source:   "Custom Built Language Server",
+      	Message:  "Diagnostic provided by custom language server",
+      })
+    }
+  }
+
+  return diagnostics
 }
 
-func (s *State) UpdateDocument(uri, text string) {
+func (s *State) OpenDocument(uri, text string) []lsp.Diagnostic {
 	s.Documents[uri] = text
+
+  return getDiagnosticsForFile(text)
+}
+
+func (s *State) UpdateDocument(uri, text string) []lsp.Diagnostic {
+	s.Documents[uri] = text
+
+  return getDiagnosticsForFile(text)
 }
 
 func (s *State) Hover(id int, uri string, position lsp.Position) lsp.HoverResponse {
