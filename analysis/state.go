@@ -2,6 +2,7 @@ package analysis
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/Yadav106/educationallsp/lsp"
 )
@@ -54,6 +55,87 @@ func (s *State) Definition(id int, uri string, position lsp.Position) lsp.Defini
 					Character: 0,
 				},
 			},
+		},
+	}
+}
+
+func (s *State) TextDocumentCodeAction(id int, uri string) lsp.CodeActionResponse {
+	text := s.Documents[uri]
+	actions := []lsp.CodeAction{}
+
+  uri_split := strings.Split(uri, "/")
+  title := uri_split[len(uri_split) - 2]
+
+  text_split := strings.Split(text, "\n")
+
+  if (len(text_split) > 0) && (strings.Index(text_split[0], title) < 0) {
+    appendChange := map[string][]lsp.TextEdit{}
+    appendChange[uri] = []lsp.TextEdit {
+      {
+        Range:   LineRange(0, 0, 0),
+      	NewText: fmt.Sprintf("# %s\n", title),
+      },
+    }
+
+    actions = append(actions, lsp.CodeAction{
+    	Title:   "Add title to the markdown file",
+    	Edit:    &lsp.WorkspaceEdit{
+        Changes: appendChange,
+      },
+    })
+  }
+
+	for row, line := range text_split {
+		idx := strings.Index(line, "VS Code")
+		if idx >= 0 {
+			replaceChange := map[string][]lsp.TextEdit{}
+			replaceChange[uri] = []lsp.TextEdit{
+				{
+					Range:   LineRange(row, idx, idx+len("VS Code")),
+					NewText: "Neovim",
+				},
+			}
+
+			actions = append(actions, lsp.CodeAction{
+				Title: "Replace VS Code with a superior editor",
+				Edit: &lsp.WorkspaceEdit{
+					Changes: replaceChange,
+				},
+			})
+
+			censorChange := map[string][]lsp.TextEdit{}
+			censorChange[uri] = []lsp.TextEdit{
+				{
+					Range:   LineRange(row, idx, idx+len("VS Code")),
+					NewText: "VS C*de",
+				},
+			}
+
+			actions = append(actions, lsp.CodeAction{
+				Title: "Censor to VS C*de",
+				Edit:  &lsp.WorkspaceEdit{Changes: censorChange},
+			})
+		}
+	}
+
+	return lsp.CodeActionResponse{
+		Response: lsp.Response{
+			RPC: "2.0",
+			ID:  &id,
+		},
+		Result: actions,
+	}
+}
+
+func LineRange(line, start, end int) lsp.Range {
+	return lsp.Range{
+		Start: lsp.Position{
+			Line:      line,
+			Character: start,
+		},
+		End: lsp.Position{
+			Line:      line,
+			Character: end,
 		},
 	}
 }
