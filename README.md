@@ -1,15 +1,17 @@
 # educationallsp
 
 ## Table of Contents
-- [Demo](#demo)
+- [Screenshots](#screenshots)
 - [What is a Language Server](#what-is-a-language-server)
 - [How does it work](#how-does-lsp-work)
 - [JSON-RPC](#json-rpc)
 - [Resources](#resources)
 
-# Demo
-Click on the thumbnail to watch the video
-[![LSP Demo](thumbnail.png)](lsp%20demo.mov)
+# Screenshots
+<img src="1.png" alt="Code Actions" width="500" height="333"></img>
+<img src="2.png" alt="Auto-Completion" width="500" height="333"></img>
+<img src="3.png" alt="Diagnostics" width="500" height="333"></img>
+<img src="4.png" alt="Hover" width="500" height="333"></img>
 
 ## What is a Language Server?
 A language server is a standalone program that provides language-specific features like *code completion*, *syntax checking*, *go-to definition*, and more to an editor or Integrated Development Environment (IDE) via the Language Server Protocol (LSP). It acts as a backend, processing requests from the editor and returning results to enhance coding productivity and accuracy.
